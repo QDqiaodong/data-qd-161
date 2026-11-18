@@ -5,3 +5,5 @@ Offline DNS operators provide origin, default_ttl and up to 10,000 structured re
 The audit reports, rather than silently repairs, apex SOA count, missing apex NS, CNAME coexistence, MX-to-CNAME targets, and missing in-zone nameserver glue for child delegations. Input syntax, duplicate records, unsupported types and invalid IP addresses are rejected. Data is a declarative zone snapshot; no DNS queries or server changes occur.
 
 The synthetic fixture has an apex SOA/NS and a child delegation. A missing glue A record is reported as a finding while the CLI succeeds. This is not a complete RFC zone-file parser, DNSSEC validator, or live resolver.
+
+A separate multi-zone audit answers a different question: given several same-instant zone snapshots and the directly reachable root zones, can each zone's first usable authoritative endpoint be obtained from the roots, and which datum proves it. Its input/output contract, authority and rounds model, and design tradeoffs live in [bootstrap.md](bootstrap.md); it reuses this document's name, TTL, IP and record rules per zone and never lets the local findings above reject input or decide reachability.
