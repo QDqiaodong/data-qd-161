@@ -20,7 +20,8 @@ def dns_name(value, origin):
 
 def analyze(data):
     require(data, 'origin default_ttl records')
-    origin = dns_name(data['origin'], data['origin']) if str(data['origin']).endswith('.') else dns_name(data['origin'] + '.', data['origin'] + '.')
+    raw_origin = ident(data['origin'])
+    origin = dns_name(raw_origin.rstrip('.') + '.', raw_origin.rstrip('.') + '.')
     ttl = number(data['default_ttl'], 0, 2147483647)
     records = []
     identities = set()
@@ -29,6 +30,8 @@ def analyze(data):
             raise ValueError('record object required')
         require(raw, 'owner type ttl data')
         owner = dns_name(raw['owner'], origin)
+        if owner != origin and not owner.endswith('.' + origin):
+            raise ValueError('record owner outside zone')
         kind = raw['type']
         if kind not in ('SOA', 'NS', 'A', 'AAAA', 'CNAME', 'MX', 'TXT'):
             raise ValueError('unsupported record type')
@@ -78,6 +81,7 @@ def analyze(data):
     for child in sorted(delegations):
         targets = {r['data'] for r in by_owner.get(child, []) if r['type'] == 'NS'}
         for target in sorted(targets):
-            if target.endswith(origin) and target not in by_owner:
+            in_zone = target == origin or target.endswith('.' + origin)
+            if in_zone and not any(r['type'] in ('A', 'AAAA') for r in by_owner.get(target, [])):
                 issues.append({'code': 'in_zone_glue_missing', 'owner': child, 'target': target})
     return {'origin': origin, 'record_count': len(records), 'records': sorted(records, key=lambda r: (r['owner'], r['type'], repr(r['data']))), 'issues': issues, 'valid': not issues}

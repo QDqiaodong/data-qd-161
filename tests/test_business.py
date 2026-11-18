@@ -66,3 +66,21 @@ class DnsZoneTests(unittest.TestCase):
         data['records'].append({'owner': 'v6', 'type': 'AAAA', 'ttl': None, 'data': '2001:0db8::1'})
         result = next(r for r in analyze(data)['records'] if r['type'] == 'AAAA')
         self.assertEqual(result['data'], '2001:db8::1')
+
+    def test_glue_requires_address_record(self):
+        data = fixture()
+        data['records'].append({'owner': 'ns.child', 'type': 'TXT', 'ttl': None, 'data': 'not glue'})
+        self.assertIn('in_zone_glue_missing', {x['code'] for x in analyze(data)['issues']})
+        data['records'].append({'owner': 'ns.child', 'type': 'AAAA', 'ttl': None, 'data': '2001:db8::53'})
+        self.assertTrue(analyze(data)['valid'])
+
+    def test_external_target_suffix_is_not_in_zone(self):
+        data = fixture()
+        data['records'][-1]['data'] = 'ns.notexample.test.'
+        self.assertTrue(analyze(data)['valid'])
+
+    def test_record_owner_outside_zone_rejected(self):
+        data = fixture()
+        data['records'][2]['owner'] = 'ns.other.test.'
+        with self.assertRaisesRegex(ValueError, 'outside zone'):
+            analyze(data)
