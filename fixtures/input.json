@@ -1,0 +1,12 @@
+{
+  "origin": "example.test.",
+  "default_ttl": 3600,
+  "records": [
+    {"owner": "@", "type": "SOA", "ttl": null, "data": {"mname": "ns1", "rname": "hostmaster", "serial": 7, "refresh": 3600, "retry": 600, "expire": 1209600, "minimum": 300}},
+    {"owner": "@", "type": "NS", "ttl": null, "data": "ns1"},
+    {"owner": "ns1", "type": "A", "ttl": 300, "data": "192.0.2.53"},
+    {"owner": "www", "type": "CNAME", "ttl": null, "data": "web"},
+    {"owner": "web", "type": "A", "ttl": 60, "data": "192.0.2.80"},
+    {"owner": "child", "type": "NS", "ttl": null, "data": "ns.child"}
+  ]
+}

@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools==80.9.0", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "data-qd-161"
+version = "0.1.0"
+description = "Offline authoritative DNS zone semantic validation and delegation checks"
+requires-python = ">=3.11"
+dependencies = []
+[project.scripts]
+dns-zone-audit = "dns_zone_audit.cli:main"
+[tool.setuptools.packages.find]
+where = ["src"]
