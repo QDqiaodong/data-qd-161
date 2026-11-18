@@ -10,5 +10,6 @@ dependencies = []
 [project.scripts]
 dns-zone-audit = "dns_zone_audit.cli:main"
 dns-zone-bootstrap = "dns_zone_audit.bootstrap_cli:main"
+dns-zone-change = "dns_zone_audit.change_cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]

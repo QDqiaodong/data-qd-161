@@ -7,3 +7,5 @@ The audit reports, rather than silently repairs, apex SOA count, missing apex NS
 The synthetic fixture has an apex SOA/NS and a child delegation. A missing glue A record is reported as a finding while the CLI succeeds. This is not a complete RFC zone-file parser, DNSSEC validator, or live resolver.
 
 A separate multi-zone audit answers a different question: given several same-instant zone snapshots and the directly reachable root zones, can each zone's first usable authoritative endpoint be obtained from the roots, and which datum proves it. Its input/output contract, authority and rounds model, and design tradeoffs live in [bootstrap.md](bootstrap.md); it reuses this document's name, TTL, IP and record rules per zone and never lets the local findings above reject input or decide reachability.
+
+A third audit compares a current and a candidate snapshot of one origin: it reuses the same per-zone normalization, reports normalized resource-record differences by RDATA identity plus TTL, and combines them with an RFC 1982 SOA serial comparison into a publish decision. See [change.md](change.md).

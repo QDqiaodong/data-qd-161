@@ -1,6 +1,6 @@
 # data-qd-161 · 权威DNS区域一致性审计
 
-Offline authoritative DNS zone semantic validation and delegation checks。业务输入、计算和当前边界详见 [数据契约](docs/contract.md)；多区域离线引导可达性审计见 [bootstrap 契约](docs/bootstrap.md)。
+Offline authoritative DNS zone semantic validation and delegation checks。业务输入、计算和当前边界详见 [数据契约](docs/contract.md)；多区域离线引导可达性审计见 [bootstrap 契约](docs/bootstrap.md)；同源候选快照的发布变更审计见 [change 契约](docs/change.md)。
 
 ## 安装与演示
 
@@ -13,10 +13,11 @@ uv pip install --python .venv/bin/python --no-build-isolation --no-deps .
 uv pip check --python .venv/bin/python
 .venv/bin/dns-zone-audit --source fixtures/input.json --output run/report.json
 .venv/bin/dns-zone-bootstrap --source fixtures/bootstrap-input.json --output run/bootstrap-report.json
+.venv/bin/dns-zone-change --source fixtures/change-input.json --output run/change-report.json
 .venv/bin/python -m unittest discover -s tests -v
 ```
 
-修改源码后重新安装。演示应报告 `valid=false` 和一条 `in_zone_glue_missing` 发现；这是样例预期，不是CLI失败。bootstrap 演示应报告 `all_reachable=true`，`a.example.test.` 第1轮以 glue 成立、`b.example.test.` 第2轮以 authority 成立。本仓不共享其他仓环境，不依赖Docker、外部账号或持续服务。
+修改源码后重新安装。演示应报告 `valid=false` 和一条 `in_zone_glue_missing` 发现；这是样例预期，不是CLI失败。bootstrap 演示应报告 `all_reachable=true`，`a.example.test.` 第1轮以 glue 成立、`b.example.test.` 第2轮以 authority 成立。change 演示的候选 serial 从 `0xffffffff` 回绕到 `0`，应报告 `relation=newer`、`can_publish=true`，并把仅 TTL 变化的 A 记录列为 `ttl_changed`。本仓不共享其他仓环境，不依赖Docker、外部账号或持续服务。
 
 输入JSON最多8MB，拒绝重复键、非有限数值和未定义字段；源字节SHA256随结果保留。
 输出是可独立读取的JSON；成功后原子替换，输入/计算失败退出2并保留旧报告。
@@ -25,4 +26,5 @@ uv pip check --python .venv/bin/python
 
 src/dns_zone_audit/model.py 为业务模型，common.py 提供受限JSON及报告发布，
 cli.py 衔接数据链路。bootstrap.py 复用单区域规范化，按显式依赖规则求根区域支持的最小闭包，
-bootstrap_cli.py 以同一发布语义输出多区域可达性报告。fixtures 为明确自制样例，代码与样例采用MIT许可。
+bootstrap_cli.py 以同一发布语义输出多区域可达性报告。change.py 在同一规范化之上按 RDATA 身份匹配两份快照并做 RFC 1982 serial 判定，
+change_cli.py 以相同发布语义输出变更审计报告。fixtures 为明确自制样例，代码与样例采用MIT许可。
