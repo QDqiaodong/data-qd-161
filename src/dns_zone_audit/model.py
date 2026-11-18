@@ -2,8 +2,22 @@ import ipaddress
 import re
 from .common import require, ident, number, rows
 
+_LABEL = re.compile(r'[a-z0-9](?:[a-z0-9-]*[a-z0-9])?')
 
-def dns_name(value, origin):
+
+def _plain_label(label):
+    return len(label) <= 63 and _LABEL.fullmatch(label) is not None
+
+
+def dns_name(value, origin, wildcard=False):
+    """Normalize a relative/absolute name, optionally allowing a leading ``*``.
+
+    Only a complete first label ``*`` may be a wildcard, and only when the
+    caller opts in (record owners in the single-zone model).  Every other
+    label keeps the strict ASCII DNS label rules, so ``*`` can never appear
+    inside a label or outside the first position.  RDATA names and query
+    names keep the default and therefore reject wildcards entirely.
+    """
     ident(value)
     if value == '@':
         return origin
@@ -12,9 +26,14 @@ def dns_name(value, origin):
     if not absolute:
         name = name + '.' + origin[:-1]
     name = name.lower() + '.'
-    labels = name[:-1].split('.')
-    if len(name) > 255 or any(len(label) > 63 or not re.fullmatch(r'[a-z0-9](?:[a-z0-9-]*[a-z0-9])?', label) for label in labels):
+    if len(name) > 255:
         raise ValueError('invalid DNS name')
+    labels = name[:-1].split('.')
+    for index, label in enumerate(labels):
+        if wildcard and index == 0 and label == '*':
+            continue
+        if not _plain_label(label):
+            raise ValueError('invalid DNS name')
     return name
 
 
@@ -29,7 +48,7 @@ def analyze(data):
         if not isinstance(raw, dict):
             raise ValueError('record object required')
         require(raw, 'owner type ttl data')
-        owner = dns_name(raw['owner'], origin)
+        owner = dns_name(raw['owner'], origin, wildcard=True)
         if owner != origin and not owner.endswith('.' + origin):
             raise ValueError('record owner outside zone')
         kind = raw['type']
