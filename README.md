@@ -1,6 +1,6 @@
 # data-qd-161 · 权威DNS区域一致性审计
 
-Offline authoritative DNS zone semantic validation and delegation checks。业务输入、计算和当前边界详见 [数据契约](docs/contract.md)；多区域离线引导可达性审计见 [bootstrap 契约](docs/bootstrap.md)；同源候选快照的发布变更审计见 [change 契约](docs/change.md)；单区 wildcard 有效答案审计见 [wildcard 契约](docs/wildcard.md)；离线区域文本包导入见 [zone-import 契约](docs/zone-import.md)。
+Offline authoritative DNS zone semantic validation and delegation checks。业务输入、计算和当前边界详见 [数据契约](docs/contract.md)；多区域离线引导可达性审计见 [bootstrap 契约](docs/bootstrap.md)；同源候选快照的发布变更审计见 [change 契约](docs/change.md)；单区 wildcard 有效答案审计见 [wildcard 契约](docs/wildcard.md)；离线区域文本包导入见 [zone-import 契约](docs/zone-import.md)；单缓存观测日志的离线探针回放见 [cache-replay 契约](docs/cache-replay.md)。
 
 ## 安装与演示
 
@@ -16,10 +16,11 @@ uv pip check --python .venv/bin/python
 .venv/bin/dns-zone-change --source fixtures/change-input.json --output run/change-report.json
 .venv/bin/dns-zone-wildcard --source fixtures/wildcard-input.json --output run/wildcard-report.json
 .venv/bin/dns-zone-import --source fixtures/zone-import-input.json --output run/import-report.json
+.venv/bin/dns-zone-cache-replay --source fixtures/cache-replay-input.json --output run/cache-replay-report.json
 .venv/bin/python -m unittest discover -s tests -v
 ```
 
-修改源码后重新安装。演示应报告 `valid=false` 和一条 `in_zone_glue_missing` 发现；这是样例预期，不是CLI失败。bootstrap 演示应报告 `all_reachable=true`，`a.example.test.` 第1轮以 glue 成立、`b.example.test.` 第2轮以 authority 成立。change 演示的候选 serial 从 `0xffffffff` 回绕到 `0`，应报告 `relation=newer`、`can_publish=true`，并把仅 TTL 变化的 A 记录列为 `ttl_changed`。wildcard 演示应报告 `anything` 由 apex `*` 合成、`x.branch` 由更近的 `*.branch` 合成、`branch` 为 empty non-terminal、`x.child` 为 delegated。import 演示把共享片段从两个作用域各引用一次，应产生 `www.one.example.test.`（TTL 300）与 `mail.two.example.test.`（TTL 600）两条 MX 记录，来源同为 `shared` 第 1 行但引用链分别为 `main:5` 与 `main:9`，导入区域经现有审计复核为 `valid=true`。本仓不共享其他仓环境，不依赖Docker、外部账号或持续服务。
+修改源码后重新安装。演示应报告 `valid=false` 和一条 `in_zone_glue_missing` 发现；这是样例预期，不是CLI失败。bootstrap 演示应报告 `all_reachable=true`，`a.example.test.` 第1轮以 glue 成立、`b.example.test.` 第2轮以 authority 成立。change 演示的候选 serial 从 `0xffffffff` 回绕到 `0`，应报告 `relation=newer`、`can_publish=true`，并把仅 TTL 变化的 A 记录列为 `ttl_changed`。wildcard 演示应报告 `anything` 由 apex `*` 合成、`x.branch` 由更近的 `*.branch` 合成、`branch` 为 empty non-terminal、`x.child` 为 delegated。import 演示把共享片段从两个作用域各引用一次，应产生 `www.one.example.test.`（TTL 300）与 `mail.two.example.test.`（TTL 600）两条 MX 记录，来源同为 `shared` 第 1 行但引用链分别为 `main:5` 与 `main:9`，导入区域经现有审计复核为 `valid=true`。cache-replay 演示应依次报告 `hit`、`nxdomain`、`miss`、`miss`、`hit`：短暂的 NXDOMAIN 覆盖旧地址，到期后旧地址不复活，同一秒内先于写入的探针仍为 `miss`、后于写入的为 `hit`。本仓不共享其他仓环境，不依赖Docker、外部账号或持续服务。
 
 输入JSON最多8MB，拒绝重复键、非有限数值和未定义字段；源字节SHA256随结果保留。
 输出是可独立读取的JSON；成功后原子替换，输入/计算失败退出2并保留旧报告。
@@ -31,4 +32,5 @@ cli.py 衔接数据链路。bootstrap.py 复用单区域规范化，按显式依
 bootstrap_cli.py 以同一发布语义输出多区域可达性报告。change.py 在同一规范化之上按 RDATA 身份匹配两份快照并做 RFC 1982 serial 判定，
 change_cli.py 以相同发布语义输出变更审计报告。wildcard.py 在单区节点集合上按显式/委派/ENT/wildcard 顺序判定有效答案，
 wildcard_cli.py 复用同一发布语义输出单区 wildcard 审计报告。zone_import.py 把离线文本包递归解释为单区快照并保留逐记录来源，
-zone_import_cli.py 以相同发布语义输出导入报告。fixtures 为明确自制样例，代码与样例采用MIT许可。
+zone_import_cli.py 以相同发布语义输出导入报告。cache_replay.py 在单缓存观测日志上按 seq 顺序回放事实覆盖与到期，为每条探针给出当时可得的结论、证据序号与 TTL 上界，
+cache_replay_cli.py 以相同发布语义输出回放报告。fixtures 为明确自制样例，代码与样例采用MIT许可。

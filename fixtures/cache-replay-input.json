@@ -1,0 +1,15 @@
+{
+  "events": [
+    {"seq": 10, "at": 0, "name": "b.example.test.", "kind": "rrset", "qtype": "A", "ttl": 60, "addresses": ["192.0.2.10"]},
+    {"seq": 11, "at": 0, "name": "b.example.test.", "kind": "rrset", "qtype": "AAAA", "ttl": 60, "addresses": ["2001:db8::10"]},
+    {"seq": 12, "at": 0, "name": "a.example.test.", "kind": "alias", "ttl": 60, "target": "b.example.test."},
+    {"seq": 13, "at": 1, "name": "a.example.test.", "kind": "probe", "qtype": "A"},
+    {"seq": 14, "at": 2, "name": "b.example.test.", "kind": "nxdomain", "ttl": 3},
+    {"seq": 15, "at": 2, "name": "a.example.test.", "kind": "probe", "qtype": "A"},
+    {"seq": 16, "at": 5, "name": "a.example.test.", "kind": "probe", "qtype": "AAAA"},
+    {"seq": 17, "at": 5, "name": "b.example.test.", "kind": "alias", "ttl": 20, "target": "c.example.test."},
+    {"seq": 18, "at": 5, "name": "a.example.test.", "kind": "probe", "qtype": "A"},
+    {"seq": 19, "at": 5, "name": "c.example.test.", "kind": "rrset", "qtype": "A", "ttl": 10, "addresses": ["192.0.2.20"]},
+    {"seq": 20, "at": 5, "name": "a.example.test.", "kind": "probe", "qtype": "A"}
+  ]
+}
