@@ -14,5 +14,6 @@ dns-zone-change = "dns_zone_audit.change_cli:main"
 dns-zone-wildcard = "dns_zone_audit.wildcard_cli:main"
 dns-zone-import = "dns_zone_audit.zone_import_cli:main"
 dns-zone-cache-replay = "dns_zone_audit.cache_replay_cli:main"
+dns-zone-redact = "dns_zone_audit.redact_cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]

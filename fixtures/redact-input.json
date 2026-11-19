@@ -1,0 +1,16 @@
+{
+  "origin": "example.test.",
+  "default_ttl": 3600,
+  "records": [
+    {"owner": "@", "type": "SOA", "ttl": null, "data": {"mname": "ns1.ops", "rname": "hostmaster.external-mail.net.", "serial": 7, "refresh": 3600, "retry": 600, "expire": 1209600, "minimum": 300}},
+    {"owner": "@", "type": "NS", "ttl": null, "data": "ns1.ops"},
+    {"owner": "@", "type": "MX", "ttl": null, "data": {"preference": 10, "exchange": "mail.ops"}},
+    {"owner": "@", "type": "MX", "ttl": 7200, "data": {"preference": 20, "exchange": "mail.ops"}},
+    {"owner": "ns1.ops", "type": "A", "ttl": 300, "data": "192.0.2.53"},
+    {"owner": "mail.ops", "type": "A", "ttl": 300, "data": "192.0.2.25"},
+    {"owner": "alias.ops", "type": "CNAME", "ttl": null, "data": "ghost.ops"},
+    {"owner": "leaf.ghost.ops", "type": "TXT", "ttl": null, "data": "synthetic support review note"},
+    {"owner": "*.ops", "type": "A", "ttl": null, "data": "192.0.2.99"},
+    {"owner": "www", "type": "CNAME", "ttl": null, "data": "web.external-cdn.net."}
+  ]
+}
