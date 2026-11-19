@@ -1,0 +1,9 @@
+{
+  "origin": "example.test.",
+  "default_ttl": 3600,
+  "entry": "main",
+  "fragments": {
+    "main": "; zone skeleton: the shared body is included from two scopes\n$ORIGIN one.example.test.\n$TTL 300\nwww A 192.0.2.1\n$INCLUDE shared\n$ORIGIN two.example.test.\n$TTL 600\nmail A 192.0.2.2\n$INCLUDE shared\n$ORIGIN example.test.\n$TTL 3600\n@ SOA ns1 hostmaster 7 3600 600 1209600 300\n@ NS ns1\nns1 A 192.0.2.53",
+    "shared": "  MX 10 relay\n  TXT \"served by shared fragment\""
+  }
+}
